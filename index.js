@@ -1,5 +1,6 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
+const table = require('console.table');
 
 
 // connection to mysql
@@ -20,8 +21,7 @@ function promptList() {
             type: 'list',
             message: 'What do you want to view?',
             name: 'viewAll',
-            choices: ["View All Departments", "View All Roles", "View All Employees", "Add a Department", 
-            "Add a Role", "Add an Employee", "Update an Employee Role"]
+            choices: ["View All Departments", "View All Roles", "View All Employees",]
     
         },
     ]).then(answer => {
@@ -59,6 +59,25 @@ function promptList() {
                 throw err;
             } 
             console.table(results);
+            promptList();
+        });
+    };
+    function viewRoles() {
+        db.query('SELECT roles.title AS "Job Title", roles.id AS "Role ID", departments.names AS "Department", roles.salary AS "Salary" FROM roles INNER JOIN departments ON roles.department_id = departments.id', (err, results) => {
+            if (err) {
+                throw err;
+            }
+            console.table(results);
+            promptList();
+        });
+    };
+    
+    function viewEmployees() {
+        db.query('SELECT employees.id AS "Employee ID", employees.first_name AS "First Name", employees.last_name AS "Last Name", roles.title AS "Job Title", departments.names AS "Department", roles.salary AS "Salary", CONCAT(manager.first_name, " ", manager.last_name) AS "Manager" FROM employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.department_id = departments.id LEFT JOIN employees manager ON manager.id = employees.manager_id', (err, results) => {
+            if (err) {
+                throw err
+            }
+            console.table(results)
             promptList();
         });
     };
